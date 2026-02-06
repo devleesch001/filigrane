@@ -241,12 +241,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const { PDFRawStream, PDFName } = PDFLib;
 
         const escapedText = textToRemove.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // Simple regex to check existence of text in content
         const pattern = new RegExp(`\\(${escapedText}\\)`, 'g');
         const hexText = encodeHex(textToRemove);
         const hexPattern = new RegExp(`<${hexText}>`, 'gi');
 
         const objects = pdfDoc.context.enumerateIndirectObjects();
         let modifiedCount = 0;
+        const objectsToDelete = [];
 
         for (const [ref, obj] of objects) {
             // We are looking for streams (where content is stored)
@@ -272,44 +274,63 @@ document.addEventListener('DOMContentLoaded', () => {
                     contentString += String.fromCharCode(contentBytes[i]);
                 }
 
-                let streamModified = false;
+                let objectContainsWatermark = false;
 
                 // 1. Literal Pattern
                 if (contentString.match(pattern)) {
-                    logToSidebar('status', `Trouvé (Literal) dans stream ${ref}`);
-                    logToSidebar('literal', `${ref}: replace ${pattern} with ()`);
-                    contentString = contentString.replace(pattern, '()');
-                    streamModified = true;
-                    modifiedCount++;
+                    logToSidebar('status', `Objet ${ref} contient le texte (Literal). Marquage pour suppression.`);
+                    objectContainsWatermark = true;
                 }
 
                 // 2. Hex Pattern
                 if (contentString.match(hexPattern)) {
-                    logToSidebar('status', `Trouvé (Hex) dans stream ${ref}`);
-                    logToSidebar('hex', `${ref}: replace ${hexPattern} with <>`);
-                    contentString = contentString.replace(hexPattern, '<>');
-                    streamModified = true;
-                    modifiedCount++;
+                    logToSidebar('status', `Objet ${ref} contient le texte (Hex). Marquage pour suppression.`);
+                    objectContainsWatermark = true;
                 }
 
-                if (streamModified) {
-                    const newBytes = new Uint8Array(contentString.length);
-                    for (let i = 0; i < contentString.length; i++) {
-                        newBytes[i] = contentString.charCodeAt(i);
-                    }
+                if (objectContainsWatermark) {
+                    objectsToDelete.push(ref);
+                    modifiedCount++;
+                }
+            }
+        }
 
-                    if (isCompressed) {
-                        try {
-                            const compressed = pako.deflate(newBytes);
-                            obj.contents = compressed;
-                        } catch (e) {
-                            console.error('Error recompressing', e);
-                        }
-                    } else {
-                        obj.contents = newBytes;
+        // CLEANUP REFERENCES IN PAGES
+        const pages = pdfDoc.getPages();
+        for (let i = 0; i < pages.length; i++) {
+            const page = pages[i];
+            const { Contents } = page.node.normalizedEntries();
+
+            if (!Contents) continue;
+
+            // Handle Array of Content Streams
+            if (Contents instanceof PDFLib.PDFArray) {
+                for (let j = Contents.size() - 1; j >= 0; j--) {
+                    const ref = Contents.get(j);
+                    if (objectsToDelete.includes(ref)) {
+                        Contents.remove(j);
+                        logToSidebar('status', `Reference to ${ref} removed from Page ${i + 1}`);
                     }
                 }
             }
+            // Handle Single Content Stream Reference
+            else if (Contents instanceof PDFLib.PDFRef) {
+                if (objectsToDelete.includes(Contents)) {
+                    // Start thinking about how to handle this. 
+                    // If the ONLY content stream is deleted, we might need a workaround or set to empty array.
+                    // For now, let's try setting it to null or removing the entry if possible, 
+                    // but pdf-lib might prefer an empty array.
+                    // A safe bet is to replace with an empty array.
+                    page.node.set(PDFName.of('Contents'), pdfDoc.context.obj([]));
+                    logToSidebar('status', `Reference to ${Contents} replaced with empty array on Page ${i + 1}`);
+                }
+            }
+        }
+
+        // Delete marked objects
+        for (const ref of objectsToDelete) {
+            pdfDoc.context.delete(ref);
+            logToSidebar('status', `Objet ${ref} supprimé du contexte.`);
         }
 
         if (modifiedCount > 0) {
