@@ -216,15 +216,24 @@
 
         .canvas-container {
             position: relative;
-            display: inline-block;
+            display: block;
+            width: 100%;
+            min-height: 400px;
             border: 1px solid #ccc;
             background-color: white;
             cursor: crosshair;
+            text-align: center;
+            box-sizing: border-box;
+            overflow: auto;
+            /* Allow scrolling as requested */
         }
 
         #previewCanvas {
-            display: block;
-            max-width: 100%;
+            display: inline-block;
+            /* Center with text-align */
+            height: auto;
+            max-width: none;
+            /* Allow full size, let container scroll */
         }
 
         #textOverlay {
