@@ -14,21 +14,136 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .main-container {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        position: relative;
+    }
+
+    .sidebar {
+        width: 350px;
+        background-color: #f4f4f4;
+        border-left: 1px solid #ccc;
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+        overflow-y: auto;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar h2 {
+        font-size: 1.2rem;
+        margin-top: 0;
+        border-bottom: 2px solid #ccc;
+        padding-bottom: 5px;
+    }
+
+    .log-section {
+        margin-bottom: 20px;
+        background: white;
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+    }
+
+    .log-section h3 {
+        font-size: 1rem;
+        margin-top: 0;
+        color: #333;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+    }
+
+    .log-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        max-height: 200px;
+        overflow-y: auto;
+        font-family: monospace;
+        font-size: 0.9em;
+    }
+
+    .log-list li {
+        padding: 2px 0;
+        border-bottom: 1px solid #f9f9f9;
+        word-break: break-all;
+    }
+
+    .log-list li:last-child {
+        border-bottom: none;
+    }
+
+    .log-error {
+        color: red;
+    }
+
+    .log-info {
+        color: blue;
+    }
+
+    .log-hex {
+        color: green;
+    }
+</style>
+</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+
 <body>
-    <h1>🎨 Filigrane PDF libre</h1>
-    <input type="file" id="pdfFile" accept=".pdf">
-    <div id="status"></div>
-    <div style="margin-top: 10px;">
-        <label for="watermarkText">Texte à supprimer:</label>
-        <input type="text" id="watermarkText" placeholder="Ex: Filigrane">
+    <div class="main-container">
+        <h1>🎨 Filigrane PDF libre</h1>
+        <input type="file" id="pdfFile" accept=".pdf">
+        <div id="status"></div>
+        <div style="margin-top: 10px;">
+            <label for="watermarkText">Texte à supprimer:</label>
+            <input type="text" id="watermarkText" placeholder="Ex: Filigrane">
+        </div>
+        <div style="margin-top: 10px;">
+            <button id="removeWatermarkBtn" style="padding: 5px 10px; cursor: pointer;">Supprimer le filigrane</button>
+            <button id="analyzeBtn"
+                style="padding: 5px 10px; cursor: pointer; margin-left: 10px; background-color: #2196F3; color: white; border: none;">Analyser
+                / Prévisualiser</button>
+            <button id="resetBtn"
+                style="padding: 5px 10px; cursor: pointer; margin-left: 10px; background-color: #f44336; color: white; border: none;">Réinitialiser
+                (Original)</button>
+        </div>
+        <div id="preview-container"
+            style="margin-top: 20px; border: 1px solid #ccc; padding: 10px; max-width: 100%; overflow: auto;">
+            <h3>Aperçu (Page 1) :</h3>
+            <canvas id="pdfPreview"></canvas>
+        </div>
     </div>
-    <div style="margin-top: 10px;">
-        <button id="removeWatermarkBtn" style="padding: 5px 10px; cursor: pointer;">Supprimer le filigrane</button>
-    </div>
-    <div id="preview-container"
-        style="margin-top: 20px; border: 1px solid #ccc; padding: 10px; max-width: 100%; overflow: auto;">
-        <h3>Aperçu (Page 1) :</h3>
-        <canvas id="pdfPreview"></canvas>
+
+    <div class="sidebar" id="debugSidebar">
+        <h2>Débogage PDF</h2>
+
+        <div class="log-section">
+            <h3>Erreurs / Status</h3>
+            <ul id="logErrors" class="log-list"></ul>
+        </div>
+
+        <div class="log-section">
+            <h3>Strings Trouvées (...)</h3>
+            <ul id="logLiteral" class="log-list"></ul>
+        </div>
+
+        <div class="log-section">
+            <h3>Hex Strings (<...>)</h3>
+            <ul id="logHex" class="log-list"></ul>
+        </div>
     </div>
     <script src="filigrane_remover_pdf_official.js"></script>
 </body>
