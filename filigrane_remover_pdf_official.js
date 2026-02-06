@@ -93,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let modifiedCount = 0;
 
         for (const [ref, obj] of objects) {
-            console.log(ref, obj);
 
             // We are looking for streams (where content is stored)
             if (obj instanceof PDFRawStream) {
@@ -127,7 +126,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // DEBUG: Log the start of the stream to see what it looks like
                 if (contentString.length > 0) {
-                    console.log(`Stream ${ref.toString()} (first 500 chars):`, contentString.substring(0, 500));
+                    console.groupCollapsed(`Stream ${ref.toString()} Analysis`);
+                    console.log(`Raw Content (first 500 chars):`, contentString.substring(0, 500));
+
+                    // FIND LITERAL STRINGS (...)
+                    // Basic regex to find text in parentheses (handles basic nesting and escaped parens poorly, but good for debug)
+                    const literalStrings = contentString.match(/\(([^)]+)\)/g);
+                    if (literalStrings) {
+                        console.log('Found Literal Strings:', literalStrings);
+                    }
+
+                    // FIND HEX STRINGS <...>
+                    const hexStrings = contentString.match(/<([0-9A-Fa-f]+)>/g);
+                    if (hexStrings) {
+                        console.log('Found Hex Strings:', hexStrings);
+                        // Try to decode hex strings to see if they are text
+                        const decodedHex = hexStrings.map(h => {
+                            try {
+                                const hex = h.replace(/[<>]/g, '');
+                                let str = '';
+                                for (let k = 0; k < hex.length; k += 2) {
+                                    str += String.fromCharCode(parseInt(hex.substr(k, 2), 16));
+                                }
+                                return `${h} -> "${str}"`;
+                            } catch (e) { return `${h} (invalid)`; }
+                        });
+                        console.log('Decoded Hex Strings:', decodedHex);
+                    }
+                    console.groupEnd();
                 }
 
                 let streamModified = false;
@@ -143,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 2. Hex Pattern
                 // e.g. (Hello) -> <48656C6C6F>
-                const hexText = textToRemove.split('').map(c => c.charCodeAt(0).toString(16).toUpperCase()).join('');
+                const hexText = encodeHex(textToRemove);
                 // PDF hex strings can be uppercase or lowercase, and might have spaces.
                 // We'll try strict hex first.
                 const hexPattern = new RegExp(`<${hexText}>`, 'gi');
@@ -197,5 +223,21 @@ document.addEventListener('DOMContentLoaded', () => {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+    }
+
+    function decodeHex(hex) {
+        let str = '';
+        for (let k = 0; k < hex.length; k += 2) {
+            str += String.fromCharCode(parseInt(hex.substr(k, 2), 16));
+        }
+        return str;
+    }
+
+    function encodeHex(str) {
+        let hex = '';
+        for (let i = 0; i < str.length; i++) {
+            hex += str.charCodeAt(i).toString(16).toUpperCase();
+        }
+        return hex;
     }
 });
