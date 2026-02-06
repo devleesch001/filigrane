@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     });
 
-    analyzeBtn.addEventListener('click', () => {
+    function performAnalysis() {
         if (!currentFileArrayBuffer) {
             updateStatus('Veuillez d\'abord sélectionner un fichier PDF.', 'red');
             return;
@@ -287,13 +287,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const textToRemove = watermarkInput.value;
         if (!textToRemove) {
+            // Quietly return or show status if triggered by button. 
+            // For input typing, we might not want to error immediately if empty, but here consistent behavior is fine.
             updateStatus('Veuillez entrer le texte du filigrane à chercher/analyser.', 'red');
             return;
         }
 
         const mode = removalModeSelect.value;
         updateStatus('Analyse et prévisualisation en cours...', 'blue');
-        logToSidebar('status', `Début du traitement (Mode: Preview, Strategy: ${mode})...`);
+        logToSidebar('status', `Analyse en cours (Mode: Preview, Strategy: ${mode})...`);
 
         const { PDFDocument } = PDFLib;
 
@@ -310,13 +312,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (e.message === 'No watermark found') {
                     updateStatus('Le texte spécifié n\'a pas été trouvé.', 'orange');
                     logToSidebar('status', 'Aucun texte trouvé à supprimer.');
+                    // Optionally reload original if analysis fails? Keeping current state might be safer/smoother.
                 } else {
                     console.error(e);
                     updateStatus('Erreur lors de l\'analyse : ' + e.message, 'red');
                     logToSidebar('error', 'Erreur: ' + e.message);
                 }
             });
-    });
+    }
+
+    analyzeBtn.addEventListener('click', performAnalysis);
+
+    // Debounce function
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Debounced input listener (500ms)
+    watermarkInput.addEventListener('input', debounce(() => {
+        if (currentFileArrayBuffer && watermarkInput.value) {
+            performAnalysis();
+        }
+    }, 500));
 
     resetBtn.addEventListener('click', () => {
         if (!currentFileArrayBuffer) {
