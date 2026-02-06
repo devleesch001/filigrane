@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Filigrane PDF libre</title>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI0IiBmaWxsPSIjNENBRjUwIi8+CiAgPHRleHQgeD0iMTYiIHk9IjIyIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZvbnQtc3R5bGU9Iml0YWxpYyIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5GPC90ZXh0Pgo8L3N2Zz4K">
+
+
+</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+
+<body>
+    <h1>🎨 Filigrane PDF libre</h1>
+    <input type="file" id="pdfFile" accept=".pdf">
+    <div id="status"></div>
+    <div style="margin-top: 10px;">
+        <label for="watermarkText">Texte à supprimer:</label>
+        <input type="text" id="watermarkText" placeholder="Ex: Filigrane">
+    </div>
+    <div style="margin-top: 10px;">
+        <button id="removeWatermarkBtn" style="padding: 5px 10px; cursor: pointer;">Supprimer le filigrane</button>
+    </div>
+    <div id="preview-container"
+        style="margin-top: 20px; border: 1px solid #ccc; padding: 10px; max-width: 100%; overflow: auto;">
+        <h3>Aperçu (Page 1) :</h3>
+        <canvas id="pdfPreview"></canvas>
+    </div>
+    <script src="filigrane_remover_pdf_official.js"></script>
+</body>
+
+</html>
