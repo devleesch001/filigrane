@@ -377,4 +377,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return hex;
     }
+    // Mode Selection Logic
+    const modeButtons = document.querySelectorAll('#modeButtons .style-button');
+    const hiddenModeInput = document.getElementById('removalMode');
+
+    if (modeButtons && hiddenModeInput) {
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all
+                modeButtons.forEach(b => b.classList.remove('active'));
+                // Add active to clicked
+                btn.classList.add('active');
+                // Update hidden input
+                hiddenModeInput.value = btn.dataset.value;
+            });
+        });
+    }
 });

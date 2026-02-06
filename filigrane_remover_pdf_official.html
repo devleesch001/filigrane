@@ -4,152 +4,355 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎨 Filigrane PDF libre</title>
-    <link rel="icon" type="image/svg+xml"
-        href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI0IiBmaWxsPSIjNENBRjUwIi8+CiAgPHRleHQgeD0iMTYiIHk9IjIyIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZvbnQtc3R5bGU9Iml0YWxpYyIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5GPC90ZXh0Pgo8L3N2Zz4K">
+    <title>🎨 Filigrane PDF Suppression libre - outil libre</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <style>
+        /* CSS from V1 Reference */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
 
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
 
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin: 0;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .connection-icon {
+            font-size: 24px;
+        }
+
+        .main-layout {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .left-panel {
+            flex: 1;
+        }
+
+        .right-panel {
+            flex: 1;
+            min-width: 500px;
+        }
+
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: #999;
+        }
+
+        .upload-area.dragover {
+            border-color: #4CAF50;
+            background-color: #f8fff8;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .text-input {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .text-input label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .text-input input[type="text"],
+        .text-input select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .position-inputs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .position-inputs>div {
+            flex: 1;
+        }
+
+        .position-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .position-control button {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            margin: 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .position-control input {
+            flex: 1;
+            text-align: center;
+        }
+
+        .style-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .style-button {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .style-button.active {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .status.success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+
+        .status.error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+
+        .preview-container {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .preview-controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .canvas-container {
+            position: relative;
+            display: inline-block;
+            border: 1px solid #ccc;
+            background-color: white;
+            cursor: crosshair;
+            width: 100%;
+            text-align: center;
+        }
+
+        #previewCanvas {
+            display: inline-block;
+            max-width: 100%;
+        }
+
+        .welcome-info {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+
+        .welcome-info h3 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+
+        /* Custom Logs Styles */
+        .logs-container h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        .log-section {
+            min-height: 50px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+            padding: 5px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
+        .log-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.85em;
+        }
+
+        .log-list li {
+            padding: 2px 0;
+            border-bottom: 1px solid #eee;
+            word-break: break-all;
+        }
+
+        .log-error {
+            color: red;
+        }
+
+        .log-info {
+            color: blue;
+        }
+
+        .log-hex {
+            color: green;
+        }
+    </style>
 </head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
-
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        height: 100vh;
-        overflow: hidden;
-    }
-
-    .main-container {
-        flex: 1;
-        padding: 20px;
-        overflow-y: auto;
-        position: relative;
-    }
-
-    .sidebar {
-        width: 350px;
-        background-color: #f4f4f4;
-        border-left: 1px solid #ccc;
-        display: flex;
-        flex-direction: column;
-        padding: 10px;
-        overflow-y: auto;
-        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .sidebar h2 {
-        font-size: 1.2rem;
-        margin-top: 0;
-        border-bottom: 2px solid #ccc;
-        padding-bottom: 5px;
-    }
-
-    .log-section {
-        margin-bottom: 20px;
-        background: white;
-        padding: 10px;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-    }
-
-    .log-section h3 {
-        font-size: 1rem;
-        margin-top: 0;
-        color: #333;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 5px;
-    }
-
-    .log-list {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-        max-height: 200px;
-        overflow-y: auto;
-        font-family: monospace;
-        font-size: 0.9em;
-    }
-
-    .log-list li {
-        padding: 2px 0;
-        border-bottom: 1px solid #f9f9f9;
-        word-break: break-all;
-    }
-
-    .log-list li:last-child {
-        border-bottom: none;
-    }
-
-    .log-error {
-        color: red;
-    }
-
-    .log-info {
-        color: blue;
-    }
-
-    .log-hex {
-        color: green;
-    }
-</style>
-</head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 
 <body>
-    <div class="main-container">
-        <h1>🎨 Filigrane PDF libre</h1>
-        <input type="file" id="pdfFile" accept=".pdf">
-        <div id="status"></div>
-        <div style="margin-top: 10px;">
-            <label for="watermarkText">Texte à supprimer:</label>
-            <input type="text" id="watermarkText" placeholder="Ex: Filigrane">
-        </div>
-        <div style="margin-top: 10px;">
-            <label for="removalMode">Mode de suppression:</label>
-            <select id="removalMode" style="padding: 5px;">
-                <option value="instruction">Suppression de l'instruction texte</option>
-                <option value="object">Suppression de l'objet complet (WIP)</option>
-            </select>
-        </div>
-        <div style="margin-top: 10px;">
-            <button id="removeWatermarkBtn" style="padding: 5px 10px; cursor: pointer;">Supprimer le filigrane</button>
-            <button id="analyzeBtn"
-                style="padding: 5px 10px; cursor: pointer; margin-left: 10px; background-color: #2196F3; color: white; border: none;">Analyser
-                / Prévisualiser</button>
-            <button id="resetBtn"
-                style="padding: 5px 10px; cursor: pointer; margin-left: 10px; background-color: #f44336; color: white; border: none;">Réinitialiser
-                (Original)</button>
-        </div>
-        <div id="preview-container"
-            style="margin-top: 20px; border: 1px solid #ccc; padding: 10px; max-width: 100%; overflow: auto;">
-            <h3>Aperçu (Page 1) :</h3>
-            <canvas id="pdfPreview"></canvas>
-        </div>
-    </div>
-
-    <div class="sidebar" id="debugSidebar">
-        <h2>Débogage PDF</h2>
-
-        <div class="log-section">
-            <h3>Erreurs / Status</h3>
-            <ul id="logErrors" class="log-list"></ul>
+    <div class="container">
+        <div class="header-bar">
+            <h1>🎨 Filigrane PDF Suppression - outil libre</h1>
+            <div class="connection-status">
+                <span class="connection-icon">📴</span>
+                <span>Hors-ligne (sécurisé)</span>
+            </div>
         </div>
 
-        <div class="log-section">
-            <h3>Strings Trouvées (...)</h3>
-            <ul id="logLiteral" class="log-list"></ul>
-        </div>
+        <div class="main-layout">
+            <div class="left-panel">
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('pdfFile').click()">
+                    <p style="margin:0; font-size:16px;">📂 Cliquez pour charger un PDF</p>
+                    <input type="file" id="pdfFile" accept=".pdf">
+                </div>
 
-        <div class="log-section">
-            <h3>Hex Strings (<...>)</h3>
-            <ul id="logHex" class="log-list"></ul>
+                <div class="text-input">
+                    <label for="watermarkText">👉 Texte en filigrane à enlever :</label>
+                    <input type="text" id="watermarkText" placeholder="Ex: Filigrane">
+                </div>
+
+                <div class="text-input">
+                    <label>Mode de suppression :</label>
+                    <div class="style-buttons" id="modeButtons">
+                        <div class="style-button active" data-value="instruction">Instruction texte</div>
+                        <div class="style-button" data-value="object">Objet complet (WIP)</div>
+                    </div>
+                    <input type="hidden" id="removalMode" value="instruction">
+                </div>
+
+                <div class="style-buttons">
+
+                    <button id="analyzeBtn" style="background-color: #2196F3; margin-top:0;">Analyser</button>
+                    <button id="resetBtn" style="background-color: #f44336; margin-top:0;">Réinitialiser</button>
+                </div>
+                <button id="removeWatermarkBtn" style="background-color: #4CAF50; margin-top:0;"> Suprimer le filigrane sur toutes les pages </button>
+
+                <div id="status" class="status" style="display:none;"></div>
+
+                <div class="logs-container" style="margin-top: 30px;">
+                    <h3>Status</h3>
+                    <div class="log-section">
+                        <ul id="logErrors" class="log-list"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="preview-container">
+                    <h3 style="margin-top:0; color:#333;">Aperçu</h3>
+                    <div class="canvas-container">
+                        <canvas id="pdfPreview"></canvas>
+                    </div>
+                    <div class="preview-info">
+                        <p>L'aperçu montre la première page du document chargé.</p>
+                    </div>
+                </div>
+
+                <div class="welcome-info" style="margin-top: 20px;">
+                    <h3>Info Sécurité</h3>
+                    <p>Ce traitement s'effectue entièrement dans votre navigateur. Aucun fichier n'est envoyé sur un
+                        serveur.</p>
+                </div>
+            </div>
         </div>
     </div>
     <script src="filigrane_remover_pdf_official.js"></script>
