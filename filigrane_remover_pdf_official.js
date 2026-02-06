@@ -272,31 +272,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     contentString += String.fromCharCode(contentBytes[i]);
                 }
 
-                // ANALYZE CONTENT for Sidebar
-                if (contentString.length > 0) {
-                    // FIND LITERAL STRINGS (...)
-                    const literalStrings = contentString.match(/\(([^)]+)\)/g);
-                    if (literalStrings) {
-                        literalStrings.forEach(s => {
-                            logToSidebar('literal', `${ref}: ${s}`);
-                        });
-                    }
-
-                    // FIND HEX STRINGS <...>
-                    const hexStrings = contentString.match(/<([0-9A-Fa-f]+)>/g);
-                    if (hexStrings) {
-                        hexStrings.forEach(h => {
-                            const decoded = decodeHex(h.replace(/[<>]/g, ''));
-                            logToSidebar('hex', `${ref}: ${h} -> "${decoded}"`);
-                        });
-                    }
-                }
-
                 let streamModified = false;
 
                 // 1. Literal Pattern
                 if (contentString.match(pattern)) {
                     logToSidebar('status', `Trouvé (Literal) dans stream ${ref}`);
+                    logToSidebar('literal', `${ref}: replace ${pattern} with ()`);
                     contentString = contentString.replace(pattern, '()');
                     streamModified = true;
                     modifiedCount++;
@@ -305,6 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 2. Hex Pattern
                 if (contentString.match(hexPattern)) {
                     logToSidebar('status', `Trouvé (Hex) dans stream ${ref}`);
+                    logToSidebar('hex', `${ref}: replace ${hexPattern} with <>`);
                     contentString = contentString.replace(hexPattern, '<>');
                     streamModified = true;
                     modifiedCount++;
