@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail Filigrane PDF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .tool-card {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #4CAF50;
+        }
+
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .card-description {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .action-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            text-decoration: none;
+            display: inline-block;
+            box-sizing: border-box;
+            transition: background-color 0.2s;
+        }
+
+        .action-button:hover {
+            background-color: #45a049;
+        }
+
+        .action-button.secondary {
+            background-color: #2196F3;
+        }
+
+        .action-button.secondary:hover {
+            background-color: #1976D2;
+        }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #888;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header-bar">
+            <h1>🛡️ Portail Filigrane PDF</h1>
+        </div>
+
+        <div class="dashboard-grid">
+
+            <!-- Card 1: Ajouter -->
+            <div class="tool-card">
+                <div>
+                    <div class="card-icon">✍️</div>
+                    <div class="card-title">Ajouter un Filigrane</div>
+                    <div class="card-description">
+                        L'outil original V1 pour ajouter des instructions de filigrane texte ou image à vos documents PDF.
+                    </div>
+                </div>
+                <a href="filigrane_pdf_official_V1.html" class="action-button secondary">Ouvrir l'outil V1</a>
+            </div>
+
+            <!-- Card 2: Supprimer -->
+            <div class="tool-card">
+                <div>
+                    <div class="card-icon">🎨</div>
+                    <div class="card-title">Supprimer un Filigrane</div>
+                    <div class="card-description">
+                        Outil avancé pour nettoyer les PDFs, supprimer les filigranes et instructions indésirables.
+                    </div>
+                </div>
+                <a href="filigrane_remover_pdf_official.html" class="action-button">Ouvrir le Nettoyeur</a>
+            </div>
+
+            <!-- Card 3: Vérifier -->
+            <div class="tool-card">
+                <div>
+                    <div class="card-icon">🔍</div>
+                    <div class="card-title">Vérifier un Document</div>
+                    <div class="card-description">
+                        Analysez l'authenticité d'un document et vérifiez les métadonnées de sécurité.
+                    </div>
+                </div>
+                <a href="verif_filigrane_v1.html" class="action-button secondary">Ouvrir le Vérificateur</a>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            <p>Suite d'outils Filigrane PDF - Usage Interne</p>
+        </div>
+    </div>
+
+</body>
+
+</html>
