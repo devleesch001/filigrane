@@ -134,6 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const removalModeSelect = document.getElementById('removalMode');
+
+    // ... existing code ...
+
     removeBtn.addEventListener('click', () => {
         if (!currentFileArrayBuffer) {
             updateStatus('Veuillez d\'abord sélectionner un fichier PDF.', 'red');
@@ -146,13 +150,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const mode = removalModeSelect.value;
         updateStatus('Traitement en cours... Veuillez patienter.', 'blue');
-        logToSidebar('status', 'Début du traitement (Mode: Download)...');
+        logToSidebar('status', `Début du traitement (Mode: Download, Strategy: ${mode})...`);
 
         const { PDFDocument } = PDFLib;
 
         PDFDocument.load(currentFileArrayBuffer.slice(0))
-            .then(pdfDoc => removeWatermark(pdfDoc, textToRemove))
+            .then(pdfDoc => removeWatermark(pdfDoc, textToRemove, mode))
             .then(pdfDoc => pdfDoc.save())
             .then(pdfBytes => {
                 downloadPdf(pdfBytes, 'filigrane_removed.pdf');
@@ -183,13 +188,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const mode = removalModeSelect.value;
         updateStatus('Analyse et prévisualisation en cours...', 'blue');
-        logToSidebar('status', 'Début du traitement (Mode: Preview)...');
+        logToSidebar('status', `Début du traitement (Mode: Preview, Strategy: ${mode})...`);
 
         const { PDFDocument } = PDFLib;
 
         PDFDocument.load(currentFileArrayBuffer.slice(0))
-            .then(pdfDoc => removeWatermark(pdfDoc, textToRemove))
+            .then(pdfDoc => removeWatermark(pdfDoc, textToRemove, mode))
             .then(pdfDoc => pdfDoc.save())
             .then(pdfBytes => {
                 updateStatus('Analyse terminée. Filigrane supprimé dans la prévisualisation.', 'green');

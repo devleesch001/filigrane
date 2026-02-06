@@ -112,6 +112,13 @@
             <input type="text" id="watermarkText" placeholder="Ex: Filigrane">
         </div>
         <div style="margin-top: 10px;">
+            <label for="removalMode">Mode de suppression:</label>
+            <select id="removalMode" style="padding: 5px;">
+                <option value="instruction">Suppression de l'instruction texte</option>
+                <option value="object">Suppression de l'objet complet (WIP)</option>
+            </select>
+        </div>
+        <div style="margin-top: 10px;">
             <button id="removeWatermarkBtn" style="padding: 5px 10px; cursor: pointer;">Supprimer le filigrane</button>
             <button id="analyzeBtn"
                 style="padding: 5px 10px; cursor: pointer; margin-left: 10px; background-color: #2196F3; color: white; border: none;">Analyser
