@@ -261,6 +261,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         PDFDocument.load(currentFileArrayBuffer.slice(0))
             .then(pdfDoc => removeWatermark(pdfDoc, textToRemove, mode))
+            .then(pdfDoc => {
+                pdfDoc.setTitle(`Document`);
+                pdfDoc.setSubject(`Document PDF`);
+                pdfDoc.setCreator('PDF');
+                pdfDoc.setProducer(`PDF`);
+
+                return pdfDoc;
+            })
             .then(pdfDoc => pdfDoc.save())
             .then(pdfBytes => {
                 downloadPdf(pdfBytes, 'filigrane_removed.pdf');
