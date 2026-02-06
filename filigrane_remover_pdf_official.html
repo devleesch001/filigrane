@@ -250,7 +250,7 @@
         }
 
         .log-section {
-            min-height: 50px;
+            height: 150px;
             margin-bottom: 10px;
             background: #f9f9f9;
             padding: 5px;
@@ -301,7 +301,7 @@
         <div class="main-layout">
             <div class="left-panel">
                 <div class="upload-area" id="uploadArea" onclick="document.getElementById('pdfFile').click()">
-                    <p style="margin:0; font-size:16px;">📂 Cliquez pour charger un PDF</p>
+                    <p style="margin:0; font-size:16px;">📂 Cliquez ici ou glissez-déposez votre fichier PDF</p>
                     <input type="file" id="pdfFile" accept=".pdf">
                 </div>
 
@@ -313,8 +313,8 @@
                 <div class="text-input">
                     <label>Mode de suppression :</label>
                     <div class="style-buttons" id="modeButtons">
-                        <div class="style-button active" data-value="instruction">Instruction texte</div>
-                        <div class="style-button" data-value="object">Objet complet (WIP)</div>
+                        <div class="style-button active" data-value="instruction">Texte uniquement</div>
+                        <div class="style-button" data-value="object">Couche complète (WIP)</div>
                     </div>
                     <input type="hidden" id="removalMode" value="instruction">
                 </div>

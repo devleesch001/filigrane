@@ -72,6 +72,53 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Drag and Drop Logic
+    const uploadArea = document.getElementById('uploadArea');
+
+    if (uploadArea) {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            uploadArea.classList.add('dragover');
+        }
+
+        function unhighlight(e) {
+            uploadArea.classList.remove('dragover');
+        }
+
+        uploadArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+    }
+
+    function handleFiles(files) {
+        if (files.length > 0) {
+            fileInput.files = files; // Update file input (for consistency)
+            // Trigger change event manually or call handler
+            const event = new Event('change');
+            fileInput.dispatchEvent(event);
+        }
+    }
+
     fileInput.addEventListener('change', (e) => {
         clearSidebar(); // Clear previous logs
         const file = e.target.files[0];
