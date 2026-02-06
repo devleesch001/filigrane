@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetBtn = document.getElementById('resetBtn');
     const statusDiv = document.getElementById('status');
     const watermarkInput = document.getElementById('watermarkText');
+    const pageSelector = document.getElementById('pageSelector');
+    const pageCountSpan = document.getElementById('pageCount');
+    const pageControls = document.getElementById('pageControls');
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
 
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -57,6 +60,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let currentRenderTask = null; // Track current render task to cancel if needed
+    let currentPdfDoc = null; // To store loaded PDF document for page switching
+
+    // Page Selector Event Listener
+    if (pageSelector) {
+        pageSelector.addEventListener('change', function () {
+            if (currentPdfDoc) {
+                const pageNum = parseInt(this.value);
+                loadAndDisplayPdf(null, pageNum);
+            }
+        });
+    }
 
     fileInput.addEventListener('change', (e) => {
         clearSidebar(); // Clear previous logs
@@ -98,7 +112,10 @@ document.addEventListener('DOMContentLoaded', () => {
      * Loads a PDF from an ArrayBuffer or Uint8Array and renders the first page.
      * Handles cancelling previous render tasks.
      */
-    async function loadAndDisplayPdf(data) {
+    /**
+     * Loads a PDF from data or uses existing doc, and renders specific page.
+     */
+    async function loadAndDisplayPdf(data, pageNumber = 1) {
         // Cancel previous render if it exists
         if (currentRenderTask) {
             currentRenderTask.cancel();
@@ -106,11 +123,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // pdfjsLib.getDocument accepts Uint8Array or ArrayBuffer
-            const loadingTask = pdfjsLib.getDocument(new Uint8Array(data));
-            const pdf = await loadingTask.promise;
+            // If data is provided, load new document
+            if (data) {
+                const loadingTask = pdfjsLib.getDocument(new Uint8Array(data));
+                currentPdfDoc = await loadingTask.promise;
 
-            const page = await pdf.getPage(1);
+                // Update Page Selector UI
+                if (pageSelector && pageCountSpan) {
+                    pageSelector.innerHTML = '';
+                    const numPages = currentPdfDoc.numPages;
+                    pageCountSpan.textContent = `/ ${numPages}`;
+
+                    for (let i = 1; i <= numPages; i++) {
+                        const option = document.createElement('option');
+                        option.value = i;
+                        option.textContent = i;
+                        pageSelector.appendChild(option);
+                    }
+
+                    if (numPages > 1) {
+                        pageControls.style.display = 'flex';
+                    } else {
+                        pageControls.style.display = 'none'; // Optional: hide if single page
+                        pageControls.style.display = 'flex'; // Keep consistent layout
+                    }
+                }
+            }
+
+            if (!currentPdfDoc) return;
+
+            // Update selector value if it doesn't match requested page (e.g. programmatic call)
+            if (pageSelector) {
+                pageSelector.value = pageNumber;
+            }
+
+            const page = await currentPdfDoc.getPage(pageNumber);
             const scale = 1.0;
             const viewport = page.getViewport({ scale: scale });
 
@@ -127,7 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (err) {
             if (err.name === 'RenderingCancelledException') {
-                // Ignore cancelled errors
                 return;
             }
             throw err;
@@ -200,7 +246,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(pdfBytes => {
                 updateStatus('Analyse terminée. Filigrane supprimé dans la prévisualisation.', 'green');
                 logToSidebar('status', 'Succès: Aperçu mis à jour.');
-                return loadAndDisplayPdf(pdfBytes);
+                const currentPage = pageSelector && pageSelector.value ? parseInt(pageSelector.value) : 1;
+                return loadAndDisplayPdf(pdfBytes, currentPage);
             })
             .catch(e => {
                 if (e.message === 'No watermark found') {
