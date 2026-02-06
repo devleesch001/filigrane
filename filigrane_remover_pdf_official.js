@@ -7,9 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetBtn = document.getElementById('resetBtn');
     const statusDiv = document.getElementById('status');
     const watermarkInput = document.getElementById('watermarkText');
-    const pageSelector = document.getElementById('pageSelector');
-    const pageCountSpan = document.getElementById('pageCount');
-    const pageControls = document.getElementById('pageControls');
+    const previewPageSelect = document.getElementById('previewPage');
+    const updatePreviewBtn = document.getElementById('updatePreviewBtn');
+    const previewContainer = document.getElementById('previewContainer');
+    const targetPageSpan = document.getElementById('targetPage');
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
 
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -63,11 +64,22 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentPdfDoc = null; // To store loaded PDF document for page switching
 
     // Page Selector Event Listener
-    if (pageSelector) {
-        pageSelector.addEventListener('change', function () {
+    if (previewPageSelect) {
+        previewPageSelect.addEventListener('change', function () {
             if (currentPdfDoc) {
                 const pageNum = parseInt(this.value);
+                if (targetPageSpan) targetPageSpan.textContent = pageNum;
                 loadAndDisplayPdf(null, pageNum);
+            }
+        });
+    }
+
+    if (updatePreviewBtn) {
+        updatePreviewBtn.addEventListener('click', function () {
+            if (currentPdfDoc && previewPageSelect) {
+                const pageNum = parseInt(previewPageSelect.value);
+                loadAndDisplayPdf(null, pageNum);
+                logToSidebar('status', `Aperçu actualisé (Page ${pageNum})`);
             }
         });
     }
@@ -175,33 +187,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 const loadingTask = pdfjsLib.getDocument(new Uint8Array(data));
                 currentPdfDoc = await loadingTask.promise;
 
-                // Update Page Selector UI
-                if (pageSelector && pageCountSpan) {
-                    pageSelector.innerHTML = '';
+                // Update Page Selector UI (V1 Style)
+                if (previewPageSelect) {
+                    previewPageSelect.innerHTML = '';
                     const numPages = currentPdfDoc.numPages;
-                    pageCountSpan.textContent = `/ ${numPages}`;
 
                     for (let i = 1; i <= numPages; i++) {
                         const option = document.createElement('option');
                         option.value = i;
-                        option.textContent = i;
-                        pageSelector.appendChild(option);
-                    }
-
-                    if (numPages > 1) {
-                        pageControls.style.display = 'flex';
-                    } else {
-                        pageControls.style.display = 'none'; // Optional: hide if single page
-                        pageControls.style.display = 'flex'; // Keep consistent layout
+                        option.textContent = `Page ${i}`;
+                        previewPageSelect.appendChild(option);
                     }
                 }
+
+                // Show preview container
+                if (previewContainer) previewContainer.style.display = 'block';
             }
 
             if (!currentPdfDoc) return;
 
             // Update selector value if it doesn't match requested page (e.g. programmatic call)
-            if (pageSelector) {
-                pageSelector.value = pageNumber;
+            if (previewPageSelect) {
+                previewPageSelect.value = pageNumber;
+            }
+            if (targetPageSpan) {
+                targetPageSpan.textContent = pageNumber;
             }
 
             const page = await currentPdfDoc.getPage(pageNumber);
@@ -293,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(pdfBytes => {
                 updateStatus('Analyse terminée. Filigrane supprimé dans la prévisualisation.', 'green');
                 logToSidebar('status', 'Succès: Aperçu mis à jour.');
-                const currentPage = pageSelector && pageSelector.value ? parseInt(pageSelector.value) : 1;
+                const currentPage = previewPageSelect && previewPageSelect.value ? parseInt(previewPageSelect.value) : 1;
                 return loadAndDisplayPdf(pdfBytes, currentPage);
             })
             .catch(e => {
